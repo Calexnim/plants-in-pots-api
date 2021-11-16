@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from api.models import User
+from rest_framework.authtoken.models import Token
 
 from api.serializers import UserSerializer
 
@@ -21,10 +22,11 @@ def registration_view(request):
         serializer = UserSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            serializer.save()
+            account = serializer.save()
             data['response'] = "Account created!"
+            token = Token.objects.get(user=account).key
+            data['token'] = token
             return Response(data, status=status.HTTP_201_CREATED)
-
         #Return Error
         return Response(serializer.errors)
 
