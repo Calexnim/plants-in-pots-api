@@ -4,6 +4,7 @@ from api.models import User
 class UserSerializer(serializers.ModelSerializer):
     #password1 for password confirmation
     password1 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    email = serializers.EmailField()
     class Meta:
         model = User
         fields = ['email', 'username', 'password', 'password1']
@@ -24,3 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+    def validate_email(self, value):
+        email = value.lower()
+        return email
