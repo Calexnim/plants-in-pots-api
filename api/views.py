@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,18 +10,19 @@ from api.models import User
 from api.serializers import UserSerializer
 
 # Create your views here.
-# class UserList(APIView):
     
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
 def registration_view(request):
+    """
+    Create new user
+    """
     if request.method == 'POST':
         serializer = UserSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
-            user = serializer.save()
+            serializer.save()
             data['response'] = "Account created!"
-            data['email'] = user.email
-            data['username'] = user.username
             return Response(data, status=status.HTTP_201_CREATED)
 
         #Return Error
@@ -28,9 +31,8 @@ def registration_view(request):
 @api_view(['GET'])
 def user_retrieve(request, pk):
     """
-    Retrieve user
+    Retrieve user by pk 
     """
-    print(pk)
     try:
         user = User.object.get(pk=pk)
     except User.DoesNotExist:
@@ -40,4 +42,5 @@ def user_retrieve(request, pk):
         serializer = UserSerializer(user)
         return Response(serializer.data)
     else:
-        return Response("testest", status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
