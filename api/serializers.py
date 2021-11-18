@@ -26,6 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    # Convert email to lowercase then check if exists in DB
     def validate_email(self, value):
         email = value.lower()
+        if User.object.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("Email already exists")
         return email
