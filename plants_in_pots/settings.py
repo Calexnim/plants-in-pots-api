@@ -138,3 +138,5 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+ALLOWED_HOSTS = ['192.168.0.148']
