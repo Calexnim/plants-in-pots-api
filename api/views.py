@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.http.response import Http404
+from django.shortcuts import get_object_or_404, render
 from rest_framework import permissions
 from rest_framework import response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -56,7 +57,7 @@ def user_retrieve(request, pk):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
-    List all category or create a new category
+    List all category, create new category, get one category and delete
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -68,15 +69,22 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Category.objects.all()
     
     def list(self, request):
-        serializer = CategorySerializer(self.get_queryset(), many=True)
-        return Response(serializer.data)
-    
+        """
+        List all objects
+        """
+        try:
+            serializer = CategorySerializer(self.get_queryset(), many=True)
+            return Response(serializer.data)
+        except:
+            return Response("No Category", status=status.HTTP_404_NOT_FOUND)
+
     def create(self, request):
+        """
+        Create category
+        """
         serializer = CategorySerializer(data=request.data)
         data = {}
-        print("lelelele")
         if serializer.is_valid():
-            print("abdkjewr")
             category_name = serializer.validated_data['name']
             category_description = serializer.validated_data['description']
             if category_name:
@@ -93,5 +101,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
         #Return Error
         return Response(serializer.errors)
 
-    # def retrieve(self, request, pk=None):
-        
+    def retrieve(self, request, pk=None):
+        """
+        Retrieve single object by id
+        """
+        try:
+            category = Category.objects.get(pk=pk)
+            serializer = CategorySerializer(category)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
