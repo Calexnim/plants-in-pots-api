@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework import permissions
 from rest_framework import response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from rest_framework.response import Response
@@ -61,6 +61,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         """
