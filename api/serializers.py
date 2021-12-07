@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import ReadOnlyField
 from api.models import Category, Product, User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,3 +38,4 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+        ReadOnlyField = 'id'
