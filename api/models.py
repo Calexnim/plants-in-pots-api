@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db.models.deletion import CASCADE
 from django.db.models.fields import related
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -126,6 +127,12 @@ class Product(models.Model):
     price = models.DecimalField(
         decimal_places=2,
         max_digits=6,
+    )
+    category = models.ForeignKey(
+        "Category",
+        on_delete=models.CASCADE,
+        related_name="product_category",
+        null=True,
     )
 
 #Category
