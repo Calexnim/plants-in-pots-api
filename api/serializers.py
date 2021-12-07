@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import User
+from api.models import Category, Product, User
 
 class UserSerializer(serializers.ModelSerializer):
     #password1 for password confirmation
@@ -32,3 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
         if User.object.filter(email__iexact=email).exists():
             raise serializers.ValidationError("Email already exists")
         return email
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
