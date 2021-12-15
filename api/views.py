@@ -10,9 +10,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from api import serializers
-from api.models import User, Category
+from api.models import User, Category, Product
 from rest_framework.authtoken.models import Token
-from api.serializers import CategorySerializer, UserSerializer
+from api.serializers import CategorySerializer, ProductSerializer, UserSerializer
 
 # Create your views here.
     
@@ -57,7 +57,7 @@ def user_retrieve(request, pk):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
-    List all category, create new category, get one category and delete
+    List all category, get one category
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -109,6 +109,45 @@ class CategoryViewSet(viewsets.ModelViewSet):
         try:
             category = Category.objects.get(pk=pk)
             serializer = CategorySerializer(category)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    List all Products, get one product
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def list(self, request):
+        """
+        List all Product objects
+        """
+        try:
+            category_id = request.query_params.get('category')
+            # Check product/category_id endpoint
+            #TODO: Handle 404 error for filtering category_id
+            if category_id:
+                queryset = self.get_queryset().filter(category=category_id)    
+                serializer = ProductSerializer(queryset, many=True)
+            else:
+                serializer = ProductSerializer(self.get_queryset(), many=True)
+            return Response(serializer.data)
+        except:
+            return Response("No Product", status=status.HTTP_404_NOT_FOUND)
+    
+    def retrieve(self, request, pk=None):
+        """
+        Retrieve all product objects by filtering category id
+        """
+        try:
+            product = Product.objects.get(pk=pk)
+            serializer = ProductSerializer(product)
             return Response(serializer.data)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
