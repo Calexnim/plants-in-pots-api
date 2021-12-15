@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf.urls import url, include
 from api.views import(
+    ProductViewSet,
     registration_view,
     user_retrieve,
     CategoryViewSet
@@ -11,6 +12,7 @@ app_name = "api"
 
 router = DefaultRouter()
 router.register(r'category', CategoryViewSet, basename='category')
+router.register(r'product', ProductViewSet, basename='product')
 # urlpatterns = router.urls
 urlpatterns = [
     path('account/register', registration_view, name='register'),
