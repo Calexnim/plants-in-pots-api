@@ -122,7 +122,10 @@ class Product(models.Model):
     name = models.CharField(
         max_length=255,
     )
-    description = models.TextField()
+    description = models.TextField(
+        null=True,
+        blank=True,
+    )
     image = models.ImageField()
     price = models.DecimalField(
         decimal_places=2,
@@ -135,6 +138,9 @@ class Product(models.Model):
         null=True,
     )
 
+    def __str__(self):
+        return self.name
+        
 #Category
 class Category(models.Model):
     name = models.CharField(
