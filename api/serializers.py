@@ -39,3 +39,11 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
         ReadOnlyField = 'id'
+
+
+# Get product
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+        ReadOnlyField = 'id'
