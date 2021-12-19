@@ -126,7 +126,7 @@ class Product(models.Model):
         null=True,
         blank=True,
     )
-    image = models.ImageField()
+    image = models.ImageField(upload_to="images/")
     price = models.DecimalField(
         decimal_places=2,
         max_digits=6,
