@@ -130,11 +130,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         try:
             category_id = request.query_params.get('category')
-            # Check product/category_id endpoint
-            #TODO: Handle 404 error for filtering category_id
+            # Check product/?category_id endpoint
             if category_id:
                 queryset = self.get_queryset().filter(category=category_id)    
                 serializer = ProductSerializer(queryset, many=True)
+                if not serializer.data:
+                    return Response("No product", status=status.HTTP_404_NOT_FOUND)
             else:
                 serializer = ProductSerializer(self.get_queryset(), many=True)
             return Response(serializer.data)
@@ -143,7 +144,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     def retrieve(self, request, pk=None):
         """
-        Retrieve all product objects by filtering category id
+        Retrieve one product
         """
         try:
             product = Product.objects.get(pk=pk)
