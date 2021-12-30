@@ -141,6 +141,18 @@ class Product(models.Model):
     def __str__(self):
         return self.name
         
+#Pot
+class Pot(models.Model):
+    name = models.CharField(
+        max_length=255,
+    )
+    price = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+    )
+
+    def __str__(self):
+        return self.name
 #Category
 class Category(models.Model):
     name = models.CharField(
