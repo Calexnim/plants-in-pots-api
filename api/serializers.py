@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
-from api.models import Category, Product, User
+from api.models import Category, Pot, Product, User
 
 class UserSerializer(serializers.ModelSerializer):
     #password1 for password confirmation
@@ -47,3 +47,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         ReadOnlyField = 'id'
+
+# Pot
+class PotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pot
+        fields = '__all__'
+        ReadOnlyField = '__all__'

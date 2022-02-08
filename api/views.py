@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from api import serializers
-from api.models import User, Category, Product
+from api.models import User, Category, Product, Pot
 from rest_framework.authtoken.models import Token
-from api.serializers import CategorySerializer, ProductSerializer, UserSerializer
+from api.serializers import CategorySerializer, PotSerializer, ProductSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -127,6 +127,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return super().get_queryset()
 
+class PotViewSet(viewsets.ModelViewSet):
+    """
+    List all Pots, get one pot
+    """
+    queryset = Pot.objects.all()
+    serializer_class = PotSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     # def list(self, request):
     #     """
     #     List all Product objects
