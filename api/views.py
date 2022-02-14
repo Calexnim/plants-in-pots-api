@@ -6,12 +6,13 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthentic
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from api import serializers
-from api.models import User, Category, Product, Pot
+from api.models import CartItem, User, Category, Product, Pot, Cart
 from rest_framework.authtoken.models import Token
-from api.serializers import CategorySerializer, PotSerializer, ProductSerializer, UserSerializer
+from api.serializers import CartItemSerializer, CategorySerializer, PotSerializer, ProductSerializer, UserSerializer, CartSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -29,6 +30,10 @@ def registration_view(request):
             data['response'] = "Account created!"
             token = Token.objects.get(user=account).key
             data['token'] = token
+            # Get user id from token
+            user_id = Token.objects.get(key=token).user_id
+            data['user_id'] = user_id
+            # return token and user_id once created
             return Response(data, status=status.HTTP_201_CREATED)
         #Return Error
         return Response(serializer.errors)
@@ -48,6 +53,18 @@ def user_retrieve(request, pk):
         return Response(serializer.data)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Custom ObtainAuthToken to return user_id & token
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk
+        })
 
 # class RegistrationView(APIView):
 #     """
@@ -134,32 +151,27 @@ class PotViewSet(viewsets.ModelViewSet):
     queryset = Pot.objects.all()
     serializer_class = PotSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    # def list(self, request):
-    #     """
-    #     List all Product objects
-    #     """
-    #     try:
-    #         category_id = request.query_params.get('category')
-    #         # Check product/?category_id endpoint
-    #         if category_id:
-    #             queryset = self.get_queryset().filter(category=category_id)    
-    #             serializer = ProductSerializer(queryset, many=True)
-    #             if not serializer.data:
-    #                 return Response("No product", status=status.HTTP_404_NOT_FOUND)
-    #         else:
-    #             serializer = ProductSerializer(self.get_queryset(), many=True)
-    #         return Response(serializer.data)
-    #     except:
-    #         return Response("No Product", status=status.HTTP_404_NOT_FOUND)
+
+class CartViewSet(viewsets.ModelViewSet):
+    """
+    Create & list cart
+    """
+    queryset = Cart.objects.all()
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = CartSerializer
+    lookup_field = 'user'
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+class CartItemViewSet(viewsets.ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return super().get_queryset()
     
-    # def retrieve(self, request, pk=None):
-    #     """
-    #     Retrieve one product
-    #     """
-    #     try:
-    #         product = Product.objects.get(pk=pk)
-    #         serializer = ProductSerializer(product)
-    #         return Response(serializer.data)
-    #     except:
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
 

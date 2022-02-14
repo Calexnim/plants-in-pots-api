@@ -141,6 +141,19 @@ class Product(models.Model):
     def __str__(self):
         return self.name
         
+#Fertilizer
+class Fertilizer(models.Model):
+    name = models.CharField(
+        max_length=255,
+    )
+    price = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+    )
+
+    def __str__(self):
+        return self.name
+
 #Pot
 class Pot(models.Model):
     name = models.CharField(
@@ -178,19 +191,31 @@ class Cart(models.Model):
     date_time_created = models.DateTimeField(
         auto_now=True,
     )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart_user_id',
+    )
+    cart_item = models.ManyToManyField(
+        "CartItem",
+        related_name="cart_item"
+    )
 
 #Cart Item
 class CartItem(models.Model):
-    cart = models.ForeignKey(
-        Cart,
-        on_delete=models.CASCADE,
-    )
     product = models.ForeignKey(
         Product,
-        on_delete=models.CASCADE,
-        related_name='cart_item_product_id',
+        on_delete=models.CASCADE, 
+        related_name="cart_product",
     )
-    quantity = models.IntegerField()
+    pot = models.ForeignKey(
+        Pot,
+        on_delete=models.CASCADE, 
+    )
+    fertilizer = models.ForeignKey(
+        Fertilizer,
+        on_delete=models.CASCADE,
+    )
 
 #Order
 class Order(models.Model):
