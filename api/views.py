@@ -10,9 +10,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from api import serializers
-from api.models import CartItem, User, Category, Product, Pot, Cart
+from api.models import CartItem, Fertilizer, User, Category, Product, Pot, Cart
 from rest_framework.authtoken.models import Token
-from api.serializers import CartItemSerializer, CategorySerializer, PotSerializer, ProductSerializer, UserSerializer, CartSerializer
+from api.serializers import CartItemReadSerializer, CartItemWriteSerializer, CartSerializerRead, CartSerializerWrite, CategorySerializer, FertilizerSerializer, PotSerializer, ProductSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -152,22 +152,49 @@ class PotViewSet(viewsets.ModelViewSet):
     serializer_class = PotSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-class CartViewSet(viewsets.ModelViewSet):
+class FertilizerViewSet(viewsets.ModelViewSet):
+    """
+    List all Fertilizer, get one fertilizer
+    """
+    queryset = Fertilizer.objects.all()
+    serializer_class = FertilizerSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+# Different serializer based on http method for Cart
+class CartsViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CartSerializerRead
+        if self.action == 'update' or self.action == 'create' or self.action == 'retrieve' or self.action == 'destroy':
+            return CartSerializerWrite
+        return CartSerializerRead
+
+class CartViewSet(CartsViewSet):
     """
     Create & list cart
     """
     queryset = Cart.objects.all()
     authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = CartSerializer
+    # serializer_class = CartSerializer
     lookup_field = 'user'
 
     def get_queryset(self):
         return super().get_queryset()
 
-class CartItemViewSet(viewsets.ModelViewSet):
+# Different serializer based on http method for Cart Item
+class CartItemsViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return CartItemReadSerializer
+        if self.action == 'destroy' or self.action == 'list':
+            return CartItemWriteSerializer
+        return CartItemWriteSerializer
+
+
+class CartItemViewSet(CartItemsViewSet):
     queryset = CartItem.objects.all()
-    serializer_class = CartItemSerializer
+    # serializer_class = CartItemSerializer
     authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticatedOrReadOnly]
 

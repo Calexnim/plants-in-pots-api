@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
-from api.models import CartItem, Category, Pot, Product, User, Cart
+from api.models import CartItem, Category, Fertilizer, Pot, Product, User, Cart
 
 class UserSerializer(serializers.ModelSerializer):
     #password1 for password confirmation
@@ -55,16 +55,37 @@ class PotSerializer(serializers.ModelSerializer):
         fields = '__all__'
         ReadOnlyField = '__all__'
 
-# CartItem
-class CartItemSerializer(serializers.ModelSerializer):
+# Fertilizer
+class FertilizerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fertilizer
+        fields = '__all__'
+        ReadOnlyField = '__all__'
+
+# CartItem Read
+class CartItemReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = '__all__'
-        # depth = 1
+        depth = 1
     
-# Cart
-class CartSerializer(serializers.ModelSerializer):
-    cart_item = CartItemSerializer(many=True, partial=True)
+# CartItem Write
+class CartItemWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = '__all__'
+
+
+# CartSerializer Read
+class CartSerializerRead(serializers.ModelSerializer):
+    cart_item = CartItemReadSerializer(many=True)
+    class Meta:
+        model = Cart
+        fields = '__all__'
+
+# CartSerializer Write
+class CartSerializerWrite(serializers.ModelSerializer):
+    cart_item = CartItemWriteSerializer(many=True, partial=True)
     class Meta:
         model = Cart
         fields = '__all__'
