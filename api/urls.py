@@ -6,6 +6,7 @@ from api.views import(
     CartItemViewSet,
     CartViewSet,
     CustomAuthToken,
+    FertilizerViewSet,
     PotViewSet,
     ProductViewSet,
     registration_view,
@@ -20,6 +21,7 @@ router = DefaultRouter()
 router.register(r'category', CategoryViewSet, basename='category')
 router.register(r'product', ProductViewSet, basename='product')
 router.register(r'pot', PotViewSet, basename='pot')
+router.register(r'fertilizer', FertilizerViewSet, basename='fertilizer')
 router.register(r'cart', CartViewSet, basename='cart')
 router.register(r'cart-item', CartItemViewSet, basename='cart-item')
 # urlpatterns = router.urls
