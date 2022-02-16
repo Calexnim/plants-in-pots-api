@@ -163,9 +163,9 @@ class FertilizerViewSet(viewsets.ModelViewSet):
 # Different serializer based on http method for Cart
 class CartsViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == 'list' or self.action == 'retrieve':
             return CartSerializerRead
-        if self.action == 'update' or self.action == 'create' or self.action == 'retrieve' or self.action == 'destroy':
+        if self.action == 'update' or self.action == 'create' or self.action == 'destroy':
             return CartSerializerWrite
         return CartSerializerRead
 
