@@ -10,9 +10,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from api import serializers
-from api.models import CartItem, Fertilizer, User, Category, Product, Pot, Cart
+from api.models import CartItem, Fertilizer, Order, User, Category, Product, Pot, Cart
 from rest_framework.authtoken.models import Token
-from api.serializers import CartItemReadSerializer, CartItemWriteSerializer, CartSerializerRead, CartSerializerWrite, CategorySerializer, FertilizerSerializer, PotSerializer, ProductSerializer, UserSerializer
+from api.serializers import CartItemReadSerializer, CartItemWriteSerializer, CartSerializerRead, CartSerializerWrite, CategorySerializer, FertilizerSerializer, OrderReadSerializer, OrderWriteSerializer, PotSerializer, ProductSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -202,3 +202,47 @@ class CartItemViewSet(CartItemsViewSet):
         return super().get_queryset()
     
 
+# Different serializer based on http method for Order
+class OrdersViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return OrderReadSerializer
+        if self.action == 'update' or self.action == 'create' or self.action == 'destroy':
+            return OrderWriteSerializer
+        return OrderReadSerializer
+
+
+class OrderViewSet(OrdersViewSet):
+    """
+    Create order
+    """
+    queryset = Order.objects.all()
+    authentication_classes = [TokenAuthentication]
+    # lookup_field = 'user'
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+
+class OrderUserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Order ViewSet for filtering against user id
+    """
+    queryset = Order.objects.all()
+    authentication_classes = [TokenAuthentication]
+    serializer_class = OrderReadSerializer
+    lookup_field = 'user'
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            order = Order.objects.filter(user=self.kwargs['user'])
+            if order:
+                serializer = OrderReadSerializer(order, many=True)
+                return Response(data=serializer.data)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
