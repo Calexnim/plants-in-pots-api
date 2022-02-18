@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
-from api.models import CartItem, Category, Fertilizer, Pot, Product, User, Cart
+from api.models import CartItem, Category, Fertilizer, Order, OrderItem, Pot, Product, User, Cart
 
 class UserSerializer(serializers.ModelSerializer):
     #password1 for password confirmation
@@ -121,6 +121,63 @@ class CartSerializerWrite(serializers.ModelSerializer):
                 cart_item_object.cart_item.add(user_cart)
         return instance
 
+# Order item read serializer
+class OrderItemReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = [
+            'product',
+            'pot',
+            'fertilizer',
+            'sub_total',
+        ]
+        depth = 1
 
-        
-            
+# Order item write serializer
+class OrderItemWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = [
+            'product',
+            'pot',
+            'fertilizer',
+            'sub_total',
+        ]
+
+
+# Order Write serializer
+class OrderWriteSerializer(serializers.ModelSerializer):
+    order_item = OrderItemWriteSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+    def create(self, validated_data):
+        #pop all the items in Order
+        order_items = validated_data.pop('order_item')
+        order = Order.objects.create(**validated_data)
+        for item in order_items:
+            if item:
+                OrderItem.objects.create(order=order, **item)
+        return order
+
+# Order Read serializer
+class OrderReadSerializer(serializers.ModelSerializer):
+    order_item = OrderItemReadSerializer(many=True)
+    payment_option = serializers.CharField(source='get_payment_option_display')
+    delivery_option = serializers.CharField(source='get_delivery_option_display')
+    order_status = serializers.CharField(source='get_order_status_display')
+    order_date = serializers.DateTimeField(format="%Y-%m-%d")
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+    # def create(self, validated_data):
+    #     #pop all the items in Order
+    #     order_items = validated_data.pop('order_item')
+    #     order = Order.objects.create(**validated_data)
+    #     for item in order_items:
+    #         if item:
+    #             OrderItem.objects.create(order=order, **item)
+    #     return order
+    
