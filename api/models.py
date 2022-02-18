@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db.models.deletion import CASCADE
@@ -140,6 +141,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
         
 #Fertilizer
 class Fertilizer(models.Model):
@@ -221,43 +223,91 @@ class CartItem(models.Model):
 class Order(models.Model):
     options = [
         ('pending', 'Pending'),
-        ('received', 'Received'),
         ('ready', 'Ready for Collect'),
-        ('sending', 'Sending'),
+        ('preparing', 'Preparing'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
-    ]   
+    ]
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
     )
+    name = models.CharField(
+        max_length=255,
+        null=True,
+    )
+    email = models.EmailField(
+        verbose_name='email', 
+        max_length=60,
+        null=True,
+    )
+    phone = models.CharField(
+        max_length=20,
+        null=True,
+    )
     order_date = models.DateTimeField(
         auto_now_add=True,
     )
-    delivery_date = models.DateTimeField()
-    delivery_option = models.TextField()
+    total = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+        null=True,
+    )
+    delivery_date = models.DateTimeField(
+        null=True,
+    )
+    payment_option = models.CharField(
+        max_length=255,
+        choices=[
+            ('online', 'Email Payment Receipt'),
+            ('cod', 'Cash on Delivery'),
+        ],
+        default='online',
+    )
+    delivery_option = models.CharField(
+        max_length=255,
+        choices=[
+            ('pickup', 'Onsite Pick-up'),
+            ('delivery', 'Delivery for Service'),
+        ],
+        default='pickup',
+    )
     order_status = models.CharField(
         max_length=255,
         choices=options,
         default='pending',
     )
 
+    def __str__(self):
+        return self.name
+
 #Order Item
 class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
+        on_delete=models.CASCADE, 
+        related_name="order_product",
+    )
+    pot = models.ForeignKey(
+        Pot,
+        on_delete=models.CASCADE, 
+        related_name="order_pot",
+    )
+    fertilizer = models.ForeignKey(
+        Fertilizer,
         on_delete=models.CASCADE,
-        related_name='order_item_product_id'
+        related_name="order_fertilizer",
+    )
+    sub_total = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+        null=True,
     )
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
+        related_name="order_item"
     )
-    item_price = models.DecimalField(
-        decimal_places=2,
-        max_digits=6,
-    )
-    item_quantity = models.IntegerField()
 
 
 #TODO: Create payment method
