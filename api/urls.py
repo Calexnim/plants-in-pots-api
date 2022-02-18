@@ -7,6 +7,8 @@ from api.views import(
     CartViewSet,
     CustomAuthToken,
     FertilizerViewSet,
+    OrderUserViewSet,
+    OrderViewSet,
     PotViewSet,
     ProductViewSet,
     registration_view,
@@ -24,6 +26,8 @@ router.register(r'pot', PotViewSet, basename='pot')
 router.register(r'fertilizer', FertilizerViewSet, basename='fertilizer')
 router.register(r'cart', CartViewSet, basename='cart')
 router.register(r'cart-item', CartItemViewSet, basename='cart-item')
+router.register(r'order', OrderViewSet, basename='order')
+router.register(r'order/user', OrderUserViewSet, basename='order-user')
 # urlpatterns = router.urls
 urlpatterns = [
     path('account/register', registration_view, name='register'),
