@@ -230,7 +230,7 @@ class OrderUserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Order.objects.all()
     authentication_classes = [TokenAuthentication]
-    serializer_class = OrderReadSerializer
+    serializer_class = OrderWriteSerializer
     lookup_field = 'user'
 
     def get_queryset(self):
@@ -240,7 +240,7 @@ class OrderUserViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             order = Order.objects.filter(user=self.kwargs['user'])
             if order:
-                serializer = OrderReadSerializer(order, many=True)
+                serializer = OrderWriteSerializer(order, many=True)
                 return Response(data=serializer.data)
             else:
                 return Response(status=status.HTTP_404_NOT_FOUND)
