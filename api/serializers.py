@@ -148,6 +148,10 @@ class OrderItemWriteSerializer(serializers.ModelSerializer):
 # Order Write serializer
 class OrderWriteSerializer(serializers.ModelSerializer):
     order_item = OrderItemWriteSerializer(many=True)
+    order_date = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    payment_option = serializers.CharField(source='get_payment_option_display', read_only=True)
+    delivery_option = serializers.CharField(source='get_delivery_option_display', read_only=True)
+    order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     class Meta:
         model = Order
         fields = '__all__'
