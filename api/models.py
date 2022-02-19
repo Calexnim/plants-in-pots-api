@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import PermissionsMixin
 
 
 # Create your models here.
@@ -38,7 +39,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
 
 #User
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         verbose_name='email', 
         max_length=60, unique=True
@@ -82,7 +83,10 @@ class User(AbstractBaseUser):
         null=True,
         blank=True,
     )
-    
+    firebase_token = models.CharField(
+        max_length=255,
+        null=True
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
@@ -138,6 +142,12 @@ class Product(models.Model):
         related_name="product_category",
         null=True,
     )
+    plant_tip = models.ForeignKey(
+        "PlantTip",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="plant_tip",
+    )
 
     def __str__(self):
         return self.name
@@ -183,11 +193,15 @@ class Category(models.Model):
         
 #Plant Tip
 class PlantTip(models.Model):
+    name = models.CharField(
+        max_length=255,
+    )
     sunlight = models.TextField()
     water = models.TextField()
-    fertilizer_type = models.TextField()
-    temperature = models.TextField()
+    humidity = models.TextField()
 
+    def __str__(self):
+        return self.name
 #Cart
 class Cart(models.Model):
     date_time_created = models.DateTimeField(
@@ -225,6 +239,7 @@ class Order(models.Model):
         ('pending', 'Pending'),
         ('ready', 'Ready for Collect'),
         ('preparing', 'Preparing'),
+        ('delivering', 'Delivering'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
@@ -276,6 +291,16 @@ class Order(models.Model):
         max_length=255,
         choices=options,
         default='pending',
+    )
+    latitude = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    longtitude = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
