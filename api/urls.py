@@ -13,7 +13,8 @@ from api.views import(
     ProductViewSet,
     registration_view,
     user_retrieve,
-    CategoryViewSet
+    CategoryViewSet,
+    ChangePasswordView
 )
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
@@ -33,5 +34,6 @@ urlpatterns = [
     path('account/register', registration_view, name='register'),
     path('account/<int:pk>/', user_retrieve),
     path('account/login', CustomAuthToken.as_view(), name="login"),
+    path('account/change-password', ChangePasswordView.as_view(), name="change-password"),
     path('', include(router.urls))
 ]
