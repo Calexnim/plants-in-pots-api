@@ -37,6 +37,10 @@ class UserManager(BaseUserManager):
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
+    
+    def get_firebase_token_by_email(self, find_email):
+        user = self.get(email=find_email)
+        return user.firebase_token
 
 #User
 class User(AbstractBaseUser, PermissionsMixin):
@@ -92,8 +96,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     object = UserManager()
 
-    def __str__(self):
-        return self.email
+    # def __str__(self):
+    #     return self.email
     
     def has_perm(self, permission, obj=None):
         return self.is_admin
@@ -270,6 +274,7 @@ class Order(models.Model):
     )
     delivery_date = models.DateTimeField(
         null=True,
+        blank=True,
     )
     payment_option = models.CharField(
         max_length=255,
@@ -334,10 +339,8 @@ class OrderItem(models.Model):
         related_name="order_item"
     )
 
-
-#TODO: Create payment method
-#Payment
-# class Payment(models.Model):
-#     payment_method = models.TextField()
-#     payment_option = models.TextField()
-
+class SaleSummary(Order):
+    class Meta:
+        proxy = True
+        verbose_name = 'Sale Summary'
+        verbose_name_plural = 'Sale Summaries'
