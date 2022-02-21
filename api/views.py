@@ -8,11 +8,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
+from rest_framework.generics import UpdateAPIView
 from rest_framework import viewsets
 from api import serializers
 from api.models import CartItem, Fertilizer, Order, User, Category, Product, Pot, Cart
 from rest_framework.authtoken.models import Token
-from api.serializers import CartItemReadSerializer, CartItemWriteSerializer, CartSerializerRead, CartSerializerWrite, CategorySerializer, FertilizerSerializer, OrderReadSerializer, OrderWriteSerializer, PotSerializer, ProductSerializer, UserSerializer
+from api.serializers import CartItemReadSerializer, CartItemWriteSerializer, CartSerializerRead, CartSerializerWrite, CategorySerializer, ChangePasswordSerializer, FertilizerSerializer, OrderReadSerializer, OrderWriteSerializer, PotSerializer, ProductSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
@@ -54,12 +55,37 @@ def user_retrieve(request, pk):
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+class ChangePasswordView(UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            if not self.object.check_password(serializer.validated_data["old_password"]):
+                return Response({"old_password": ["Wrong password"]}, status=status.HTTP_400_BAD_REQUEST)
+            self.object.set_password(serializer.validated_data["new_password"])
+            self.object.save()
+            data = {
+                'response': "Password successfully changed!",
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+
 # Custom ObtainAuthToken to return user_id & token
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
+        # print(request.data['firebase_token'])
         serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        User.object.filter(id=user.pk).update(firebase_token=request.data['firebase_token'])
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
