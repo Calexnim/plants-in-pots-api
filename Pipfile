@@ -8,6 +8,11 @@ djangorestframework = "*"
 django = "*"
 psycopg2 = "*"
 pillow = "*"
+django-filter = "*"
+pyfcm = "*"
+django-admin-interface = "*"
+django-import-export = "*"
+firebase-admin = "*"
 
 [dev-packages]
 
